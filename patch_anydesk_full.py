@@ -16,7 +16,7 @@ Pipeline:
 import struct, lzma, time
 
 SRC = "/Users/macdev/Demo/Tools/AnyDesk/AnyDesk.exe"
-OUT = "/Users/macdev/Demo/Tools/AnyDesk/AnyDesk_patched.exe"
+OUT = "/Users/macdev/Demo/Tools/AnyDesk/AnyDesk_patched_full.exe"
 
 MULT = 0x19660D
 ADD  = 0x3C6EF35F
@@ -29,7 +29,6 @@ def va_to_foff(va):
     return va - 0x10000000 - 0x1000 + 0x400
 
 PATCHES = [
-    # === Previously working patches ===
     {
         "name": "countdown_skip",
         "va": 0x10626bbb,
@@ -38,20 +37,12 @@ PATCHES = [
         "desc": "Skip disconnect countdown timer (always case_0)"
     },
     {
-        "name": "banner_no_ui_add",
-        "va": 0x106c376f,
-        "expected": b"\xe8\xf0\xff\x6b\x00",
-        "patch": b"\x90\x90\x90\x90\x90",
-        "desc": "Prevent banner from being added to UI"
+        "name": "banner_func_nop",
+        "va": 0x10d83764,
+        "expected": b"\x45",
+        "patch": b"\xC3",
+        "desc": "Make banner add function return immediately (ret) - only caller is banner UI"
     },
-    {
-        "name": "banner_formatter_ret",
-        "va": 0x1084e520,
-        "expected": b"\x55\x8b\xec",
-        "patch": b"\x33\xc0\xc2\x10\x00",
-        "desc": "Banner formatter returns immediately"
-    },
-    # === New license unlock patches ===
     {
         "name": "premium_dialog_1_skip",
         "va": 0x10670788,
