@@ -7,10 +7,11 @@ Removes:
   4. Address book entry limits
   5. Screen recording restrictions
   6. Session invitation restrictions
+  7. Session timeout timers (prevents auto-disconnect after time limit)
 
 Pipeline:
   1. Decode outer AnyDesk.exe (XOR decrypt + LZMA1 decompress) -> inner PE
-  2. Patch inner PE (8 byte-level patches)
+  2. Patch inner PE (10 byte-level patches)
   3. Re-encode (LZMA1 compress + XOR encrypt) -> new AnyDesk.exe
 """
 import struct, lzma, time
@@ -77,6 +78,20 @@ PATCHES = [
         "expected": b"\x75\x07",
         "patch": b"\xEB\x07",
         "desc": "Allow session invitations on all licenses (jne->jmp)"
+    },
+    {
+        "name": "session_timeout_timer_1",
+        "va": 0x10645cd1,
+        "expected": b"\x74\x11",
+        "patch": b"\xEB\x11",
+        "desc": "Prevent session timeout SetTimer #1 (je->jmp, always skip timer)"
+    },
+    {
+        "name": "session_timeout_timer_2",
+        "va": 0x10645d68,
+        "expected": b"\x74\x5c",
+        "patch": b"\xEB\x5c",
+        "desc": "Prevent session timeout SetTimer #2 (je->jmp, always skip timer)"
     },
 ]
 
