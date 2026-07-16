@@ -11,7 +11,7 @@ Removes:
 
 Pipeline:
   1. Decode outer AnyDesk.exe (XOR decrypt + LZMA1 decompress) -> inner PE
-  2. Patch inner PE (9 byte-level patches)
+  2. Patch inner PE (11 byte-level patches)
   3. Re-encode (LZMA1 compress + XOR encrypt) -> new AnyDesk.exe
 """
 import struct, lzma, time
@@ -38,11 +38,25 @@ PATCHES = [
         "desc": "Skip disconnect countdown timer (always case_0)"
     },
     {
-        "name": "banner_skip",
-        "va": 0x10840537,
-        "expected": b"\x0f\x84\x43\x0c\x00\x00",
-        "patch": b"\xe9\x44\x0c\x00\x00\x90",
-        "desc": "Skip all banner display code (je->jmp, always jump to epilogue)"
+        "name": "banner_block1_skip",
+        "va": 0x1084059e,
+        "expected": b"\x0f\x84\xcb\x00\x00\x00",
+        "patch": b"\xe9\xcc\x00\x00\x00\x90",
+        "desc": "Skip banner block 1 (je->jmp, always skip banner type 1 setup)"
+    },
+    {
+        "name": "banner_block2_skip",
+        "va": 0x10840680,
+        "expected": b"\x0f\x84\xd0\x00\x00\x00",
+        "patch": b"\xe9\xd1\x00\x00\x00\x90",
+        "desc": "Skip banner block 2 (je->jmp, always skip banner type 2 setup)"
+    },
+    {
+        "name": "banner_block3_skip",
+        "va": 0x10840768,
+        "expected": b"\x0f\x84\xcb\x00\x00\x00",
+        "patch": b"\xe9\xcc\x00\x00\x00\x90",
+        "desc": "Skip banner block 3 / color_free_license_banner (je->jmp, always skip)"
     },
     {
         "name": "premium_dialog_1_skip",
