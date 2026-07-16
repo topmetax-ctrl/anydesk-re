@@ -11,7 +11,7 @@ Removes:
 
 Pipeline:
   1. Decode outer AnyDesk.exe (XOR decrypt + LZMA1 decompress) -> inner PE
-  2. Patch inner PE (10 byte-level patches)
+  2. Patch inner PE (9 byte-level patches)
   3. Re-encode (LZMA1 compress + XOR encrypt) -> new AnyDesk.exe
 """
 import struct, lzma, time
@@ -38,11 +38,11 @@ PATCHES = [
         "desc": "Skip disconnect countdown timer (always case_0)"
     },
     {
-        "name": "banner_func_nop",
-        "va": 0x10d83764,
-        "expected": b"\x45",
-        "patch": b"\xC3",
-        "desc": "Make banner add function return immediately (ret) - only caller is banner UI"
+        "name": "banner_skip",
+        "va": 0x10840537,
+        "expected": b"\x0f\x84\x43\x0c\x00\x00",
+        "patch": b"\xe9\x44\x0c\x00\x00\x90",
+        "desc": "Skip all banner display code (je->jmp, always jump to epilogue)"
     },
     {
         "name": "premium_dialog_1_skip",
